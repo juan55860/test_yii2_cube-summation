@@ -43,6 +43,15 @@ AppAsset::register($this);
                 ['label' => 'Login', 'url' => ['/site/login']]
             ) : (
                 '<li>'
+                . Html::beginForm(['/site/cube_summation'], 'post')
+                . Html::submitButton(
+                    'CubeSummation',
+                    ['class' => 'btn btn-link logout']
+                )
+                . Html::endForm()
+                . '</li>'
+                .
+                '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
                     'Logout (' . Yii::$app->user->identity->username . ')',
@@ -50,6 +59,7 @@ AppAsset::register($this);
                 )
                 . Html::endForm()
                 . '</li>'
+
             )
         ],
     ]);

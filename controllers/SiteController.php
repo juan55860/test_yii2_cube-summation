@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\CubeSummationForm;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -79,6 +80,36 @@ class SiteController extends Controller
             return $this->goBack();
         }
         return $this->render('login', [
+            'model' => $model,
+        ]);
+    }
+
+    public function actionCube_summation()
+    {
+        $model = new CubeSummationForm();
+
+        // if it is ajax validation request
+        if(isset($_POST['ajax']) && $_POST['ajax']=== 'cube-summation-form')
+        {
+            echo CActiveForm::validate($model);
+            Yii::app()->end();
+        }
+
+        // collect user input data
+        if(isset($_POST['CubeSummationForm']))
+        {
+            $model->attributes = $_POST['CubeSummationForm'];
+            // validate user input and redirect to the previous page if valid
+            if($model->validate() && $model->validateInput())
+            {
+                $model->resolve();
+                return $this->render('solution_cube_summation', [
+                    'model' => $model
+                ]);
+            }
+        }
+        // display the cube summation
+        return $this->render('cube_summation', [
             'model' => $model,
         ]);
     }
