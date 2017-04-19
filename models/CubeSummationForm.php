@@ -7,8 +7,9 @@ use yii\base\Model;
 
 class CubeSummationForm extends Model
 {
+
     // CONST LIMIT CONSTRAINTS
-    const MIN_VALUE_TEST_CASES = 1, MAX_VALUE_TEST_CASES = 50;
+    const MIN_VALUE_TEST_CASES = 1, MAX_VALUE_TEST_CASES = 50,  MIN_VALUE_DIMENSION = 1, MAX_VALUE_DIMENSION= 100;
 
     private $cube;
 
@@ -39,7 +40,6 @@ class CubeSummationForm extends Model
         }
         $this->createCases();
         if (!$this->reviewEachCase()) {
-            $this->addErrorForTestCaseFormed();
             return false;
         }
 
@@ -83,11 +83,25 @@ class CubeSummationForm extends Model
     {
         foreach ($this->cases as $case) {
             $operations = explode(" ", $case['test']);
-            if($operations[1] != count($case["problems"])){
+            if ($operations[1] != count($case["problems"])) {
+                $this->addErrorForTestCaseFormed();
+                return false;
+            }
+            if (!$this->validateDimensionsForCase($operations[0])) {
+                $this->addErrorForInvalidDimensionInCase();
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * @param $dimension
+     * @return bool
+     */
+    private function validateDimensionsForCase($dimension)
+    {
+        return $dimension >= self::MIN_VALUE_DIMENSION && $dimension <= self::MAX_VALUE_DIMENSION;
     }
 
     public function resolve()
@@ -233,12 +247,17 @@ class CubeSummationForm extends Model
 
     private function addErrorForTestCases()
     {
-        $this->addError('problem', 'the test cases should be between '. self::MIN_VALUE_TEST_CASES .' to ' . self::MAX_VALUE_TEST_CASES);
+        $this->addError('problem', 'the test cases should be between: '. self::MIN_VALUE_TEST_CASES .' to ' . self::MAX_VALUE_TEST_CASES);
     }
 
     private function addErrorForTestCasesSended()
     {
         $this->addError('problem', 'the units test cases are different that the sended');
+    }
+
+    private function addErrorForInvalidDimensionInCase()
+    {
+        $this->addError('problem', 'the dimension for each test should be between: '. self::MIN_VALUE_DIMENSION .' to ' . self::MAX_VALUE_DIMENSION);
     }
 
     private function addErrorForTestCaseFormed()
