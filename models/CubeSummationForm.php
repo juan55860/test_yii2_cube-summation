@@ -9,7 +9,9 @@ class CubeSummationForm extends Model
 {
 
     // CONST LIMIT CONSTRAINTS
-    const MIN_VALUE_TEST_CASES = 1, MAX_VALUE_TEST_CASES = 50,  MIN_VALUE_DIMENSION = 1, MAX_VALUE_DIMENSION= 100;
+    const MIN_VALUE_TEST_CASES = 1, MAX_VALUE_TEST_CASES = 50,
+          MIN_VALUE_DIMENSION = 1, MAX_VALUE_DIMENSION= 100,
+          VALUES_QUERY_SENTENCE = 7, VALUES_UPDATE_SENTENCE = 5;
 
     private $cube;
 
@@ -56,12 +58,12 @@ class CubeSummationForm extends Model
         for ($i = 1; $i < count($this->input); $i++) {
             $this->input[$i] = $this->removeSpaces($this->input[$i]);
             $case = explode(" ", $this->input[$i]);
-            if ($this->validateOperations($case[0])=== false) {
+            if ($this->validateOperations($case[0]) === false) {
                 array_push($this->cases, ["test" => $this->input[$i], "problems" => [], "solutions" => [] ]);
                 $problem +=1 ;
             }
             else {
-                array_push($this->cases[$problem-1]["problems"], rtrim(ltrim($this->input[$i])) );
+                array_push($this->cases[$problem-1]["problems"], $this->removeSpaces($this->input[$i]) );
             }
         }
     }
@@ -115,8 +117,16 @@ class CubeSummationForm extends Model
     {
         foreach ($problems as $problem) {
             $sentence = explode(" ", $problem);
-            if ($sentence[0] === 'UPDATE' && count($sentence) !== 5) {
+            if ($sentence[0] !== 'UPDATE' && $sentence[0] !== 'QUERY'){
+                $this->addErrorForInvalidSentence();
+                return false;
+            }
+            else if ($sentence[0] === 'UPDATE' && count($sentence) !== self::VALUES_UPDATE_SENTENCE) {
                 $this->addErrorForInvalidUpdate();
+                return false;
+            }
+            else if($sentence[0] === 'QUERY' && count($sentence) !== self::VALUES_QUERY_SENTENCE) {
+                $this->addErrorForInvalidQuery();
                 return false;
             }
         }
@@ -298,6 +308,16 @@ class CubeSummationForm extends Model
 
     private function addErrorForInvalidUpdate()
     {
-        $this->addError('problem', 'the update sentence should separated by spaces and wait 5 values by example: UPDATE 2 2 2 4');
+        $this->addError('problem', 'the update sentence should separated by spaces and wait ' . self::VALUES_UPDATE_SENTENCE . ' values by example: UPDATE 2 2 2 4');
+    }
+
+    private function addErrorForInvalidQuery()
+    {
+        $this->addError('problem', 'the query sentence should separated by spaces and wait '. self::VALUES_QUERY_SENTENCE .' values by example: QUERY 1 1 1 3 3 3');
+    }
+
+    private function addErrorForInvalidSentence()
+    {
+        $this->addError('problem', 'the query sentences should be UPDATE or SELECT');
     }
 }
