@@ -169,16 +169,38 @@ class CubeSummationForm extends Model
      * @return int
      */
     private function query($xi, $yi, $zi, $xj, $yj,$zj ){
-        $sum = 0;
         $xi= $this->indexInCube($xi);
         $yi= $this->indexInCube($yi);
         $zi= $this->indexInCube($zi);
         $xj= $this->indexInCube($xj);
         $yj= $this->indexInCube($yj);
         $zj= $this->indexInCube($zj);
-        for($i = $xi; $i< $xj; $i++) {
-            for($j = $yi; $j<$yj; $j++) {
-                for($k = $zi; $k<$zj; $k++) {
+        // ranges to sum formula : sum(x2+1,y2+1,z2+1) - sum(x1,y1,z1) - sum(x1,y2+1,z2+1) - sum(x2+1,y1,z2+1) - sum(x2+1,y2+1,z1) + sum(x1,y1,z2+1) + sum(x1,y2+1,z1) + sum(x2+1,y1,z1) = ∑(x1, y1, z1) to (x2, y2, z2)
+        $first = $this->sum($xj+1,$yj+1,$zj+1);
+        $second = $this->sum($xi,$yi,$zi);
+        $third = $this->sum($xi,$yj+1,$zj+1);
+        $four = $this->sum($xj+1,$yi,$zj+1);
+        $five = $this->sum($xj+1,$yj+1,$zi);
+        $six = $this->sum($xi,$yi,$zj+1);
+        $seven = $this->sum($xi,$yj+1,$zi);
+        $eight = $this->sum($xj+1,$yi,$zi);
+        $sum = $first - $second - $third - $four - $five + $six + $seven + $eight;
+        return $sum;
+    }
+
+
+    /**
+     * @param $x
+     * @param $y
+     * @param $z
+     * @return int
+     */
+    private function sum($x, $y, $z)
+    {
+        $sum = 0;
+        for($i = 0; $i < $x; $i++) {
+            for($j = 0; $j < $y; $j++) {
+                for($k = 0; $k < $z; $k++) {
                     $sum += $this->cube[$i][$j][$k];
                 }
             }
