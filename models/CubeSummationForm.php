@@ -61,7 +61,7 @@ class CubeSummationForm extends Model
                 $problem +=1 ;
             }
             else {
-                array_push($this->cases[$problem-1]["problems"], $this->input[$i]);
+                array_push($this->cases[$problem-1]["problems"], rtrim(ltrim($this->input[$i])) );
             }
         }
     }
@@ -91,6 +91,9 @@ class CubeSummationForm extends Model
                 $this->addErrorForInvalidDimensionInCase();
                 return false;
             }
+            if (!$this->validateDataProblem($case["problems"])) {
+                return false;
+            }
         }
         return true;
     }
@@ -102,6 +105,34 @@ class CubeSummationForm extends Model
     private function validateDimensionsForCase($dimension)
     {
         return $dimension >= self::MIN_VALUE_DIMENSION && $dimension <= self::MAX_VALUE_DIMENSION;
+    }
+
+    /**
+     * @param array $problems
+     * @return bool
+     */
+    private function validateDataProblem(array $problems)
+    {
+        foreach ($problems as $problem) {
+            $sentence = explode(" ", $problem);
+            if ($sentence[0] === 'UPDATE' && count($sentence) !== 5) {
+                $this->addErrorForInvalidUpdate();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param array $dataUpdate
+     * @return bool
+     */
+    private function validateDataUpdate(array $dataUpdate)
+    {
+        if (count($dataUpdate) == 0) {
+            return false;
+        }
+        return true;
     }
 
     public function resolve()
@@ -263,5 +294,10 @@ class CubeSummationForm extends Model
     private function addErrorForTestCaseFormed()
     {
         $this->addError('problem', 'the test cases are bad created');
+    }
+
+    private function addErrorForInvalidUpdate()
+    {
+        $this->addError('problem', 'the update sentence should separated by spaces and wait 5 values by example: UPDATE 2 2 2 4');
     }
 }

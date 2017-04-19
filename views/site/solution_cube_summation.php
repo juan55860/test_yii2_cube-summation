@@ -1,4 +1,5 @@
 <?php
+
 foreach ($model->cases as $case) {
 ?>
 
